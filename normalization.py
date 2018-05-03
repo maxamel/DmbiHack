@@ -49,9 +49,10 @@ def normalize_data(path):
 def normalize_data_no_category(path):
     data = pandas.read_csv(path)
     fix_data_to_normalize = fix_data_frame(data, data.columns)
+    fix_data_to_normalize = fix_data_to_normalize.drop(['session_ind'], axis=1)
     min_max_scalar = preprocessing.MinMaxScaler()
     normalize_data = pandas.DataFrame(min_max_scalar.fit_transform(fix_data_to_normalize))
-    normalize_data.columns = data.columns
+    normalize_data.columns = data.columns[:-1]
 
     return normalize_data
 
