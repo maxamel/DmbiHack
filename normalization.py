@@ -46,7 +46,16 @@ def normalize_data(path):
 
     return normalize_data
 
+def normalize_data_no_category(path):
+    data = pandas.read_csv(path)
+    fix_data_to_normalize = fix_data_frame(data, data.columns)
+    min_max_scalar = preprocessing.MinMaxScaler()
+    normalize_data = pandas.DataFrame(min_max_scalar.fit_transform(fix_data_to_normalize))
+    normalize_data.columns = data.columns
+
+    return normalize_data
+
 
 if __name__ == "__main__":
-    returned = normalize_data("trainingset.csv")
-    returned.to_csv("trainingset_result.csv", encoding='utf-8', sep=',', index=False)
+    returned = normalize_data_no_category("hackathon_IoT_validation_set_based_on_01mar2017_ANONYMIZED.csv")
+    returned.to_csv("hackathon_IoT_validation_set_based_on_01mar2017_ANONYMIZED_result.csv", encoding='utf-8', sep=',', index=False)
