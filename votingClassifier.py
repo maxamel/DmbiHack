@@ -8,13 +8,19 @@ def crossSetCreation(dataframe,lables):
     X_train, X_test, y_train, y_test = train_test_split( dataframe, lables, test_size = 0.4, random_state = 0)
     return  X_train, X_test, y_train, y_test
 
-def calcModelWeigths( X_test, y_test,models):
+def calcModelWeigths( X_test, y_test,models,name):
     predVector = []
     for model in models :
         predVector.append( model.predict(X_test))
+    firstModelScores = predVector[0,y_test]
+    scndModelScores= predVector[1,y_test]
+    thirdModelScore = predVector[2,y_test]
 
     print("ttt")
 
+def loadModelsToVector(path):
+    models = (loadModelFromFile(path+'/rf.pkl'),loadModelFromFile(path+'/xgboost.pkl'))
+    return models
 
 def readDataFile(path):
     df = pd.read_csv(path, nrows=1)  # read just first line for columns
@@ -33,9 +39,11 @@ def loadModelFromFile(path):
 
 if __name__ == "__main__":
     filepath = r"C:\Users\isimkin\Desktop\hakaton\project3\byDevice\lights.csv"
+    modelsPath = r"C:\Users\isimkin\Desktop\hakaton\project3\modelsPath\lights"
+    modelName = "lights"
     featuresData, labData = readDataFile(filepath)
 
-    models = [loadModelFromFile]
+    models = loadModelsToVector(modelsPath)
     X_train, X_test, y_train, y_test =  crossSetCreation(featuresData,labData)
-    calcModelWeigths(X_test, y_test)
+    calcModelWeigths(X_test, y_test,models,modelName)
     print("done")
