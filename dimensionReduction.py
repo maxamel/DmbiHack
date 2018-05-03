@@ -1,42 +1,8 @@
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.datasets import make_classification
-#
-# X, y = make_classification(n_samples=1000, n_features=4,
-#                           n_informative=2, n_redundant=0,
-#                            random_state=0, shuffle=False)
-# clf = RandomForestClassifier(max_depth=2, random_state=0)
-# clf.fit(X, y)
-# RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
-#             max_depth=2, max_features='auto', max_leaf_nodes=None,
-#             min_impurity_decrease=0.0, min_impurity_split=None,
-#             min_samples_leaf=1, min_samples_split=2,
-#             min_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,
-#             oob_score=False, random_state=0, verbose=0, warm_start=False)
-# print(clf.feature_importances_)
-# [ 0.17287856  0.80608704  0.01884792  0.00218648]
-# >>> print(clf.predict([[0, 0, 0, 0]]))
 import pandas as pd
 import numpy
 import scipy
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest, mutual_info_classif, f_classif
 from sklearn.feature_selection import chi2
-from sklearn.model_selection import cross_val_score
-
-
-def trainRF(dataFrame,Lables) :
-    clf = RandomForestClassifier(n_estimators=10, max_depth=None, min_samples_split=1, random_state=0)
-    scores = cross_val_score(clf, dataFrame, Lables)
-    print(scores.mean())
-
-    classifier = clf.fit(dataFrame, Lables)
-    return classifier
-
-def predictWithRF(classifier,dataFrame):
-    predictions = classifier.predict_proba(dataFrame)
-    return predictions
-
-
 
 def readDataFile(path):
     df = pd.read_csv(path, nrows=1)  # read just first line for columns
@@ -48,6 +14,51 @@ def readDataFile(path):
     return featuresData,labData
 
 
+def selectBestFeatures(dataset,lables,numberOfFeatures):
+    # df21 = dataset.head(500)
+    # df22 = dataset.tail(500)
+    # df2 = pd.concat([df21,df22])
+    # df31 = lables.head(500)
+    # df32 = lables.tail(500)
+    # df3 = pd.concat([df31, df32])
+    select_k_best_classifier = SelectKBest(score_func=chi2, k=numberOfFeatures).fit(dataset, lables)
+    #select_k_best_classifier = SelectKBest(score_func=mutual_info_classif, k=numberOfFeatures).fit(dataset, lables)
+    mask = select_k_best_classifier.get_support()  # list of booleans
+    new_features = []  # The list of your K best features
+    for bool, feature in zip(mask, dataset.columns.values.tolist()):
+        if bool:
+            new_features.append(feature)
+    dataframe = dataset[new_features]
+    return dataframe
+
+
+
+def remove_apprentice(sorceFile,destFile) :
+    with open(sorceFile, 'r') as infile:
+        with open(destFile, 'w') as outfile:
+            data = infile.read()
+
+            data = data.replace('\"', "")
+            data = data.replace('?', "0.5")
+            outfile.write(data)
+
+
 if __name__ == "__main__":
-    filename = "C:/Users/isimkin/Desktop/hakaton/project3/withSelectesdFeatures/security_camera.csv"
-    dataFrame = readDataFile(filename)
+    filename = "C:/Users/isimkin/Desktop/hakaton/project3/byDevice/security_camera.csv"
+    destFile = "C:/Users/isimkin/Desktop/hakaton/project3/byDevice/security_camera111.csv"
+    numberOfFeatures = 50
+    #remove_apprentice(filename,destFile)
+    dataSet,lables = readDataFile(destFile)
+    print(dataSet.shape)
+    print(lables.shape)
+
+    result = selectBestFeatures(dataSet,lables,numberOfFeatures)
+    lables.columns = ["device_category"]
+    result = pd.concat([result,lables],axis=1)
+    # pd.to_csv(path= "C:/Users/isimkin/Desktop/hakaton/project3/dataSets/hackathon_IoT_training_set_based_on_01mar2017WithoutApp222.csv")
+    result.to_csv("C:/Users/isimkin/Desktop/hakaton/project3/withSelectedFeatures/security_camera.csv", sep=',', encoding='utf-8', index=False)
+    print("done")
+    # get_top_n_features(dataSet, numberOfFeatures)
+    # generator = generator(filename=filename)
+
+    #
